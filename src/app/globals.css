@@ -1,0 +1,268 @@
+
+@import "tailwindcss";
+
+:root {
+  --background: #f0f2f5;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --foreground: #1c1e21;
+  --foreground-muted: #65676b;
+
+  --blue: #1877f2;
+  --blue-light: #e7f3ff;
+  --blue-dark: #0866ff;
+
+  /* Legacy names retained for existing components. */
+  --gold: #1877f2;
+  --gold-light: #0866ff;
+  --gold-dark: #0d5dcc;
+
+  --border: #e4e6eb;
+
+  /* Facebook-inspired system typography. */
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.container-mobile {
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+.display-font {
+  font-family: var(--font-display);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+}
+
+.gold-text {
+  color: var(--blue);
+}
+
+.gold-gradient {
+  background: linear-gradient(
+    135deg,
+    #4599ff 0%,
+    #1877f2 48%,
+    #0866ff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gold-border {
+  border: 1px solid var(--border);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.page-shell {
+  min-height: 100dvh;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.section-spacing {
+  padding: 34px 20px;
+}
+
+.muted-text {
+  color: var(--foreground-muted);
+}
+
+.gold-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--blue);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-align: center;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.gold-button:active {
+  transform: scale(0.97);
+}
+
+.gold-button:hover {
+  background: var(--blue-dark);
+}
+
+.outline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 1px solid var(--blue);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.outline-button:active {
+  transform: scale(0.97);
+}
+
+.outline-button:hover {
+  background: var(--blue-light);
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.section-eyebrow::before {
+  width: 22px;
+  height: 1px;
+  background: var(--blue);
+  content: "";
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes gentle-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: gentle-fade-up 700ms ease both;
+}
+
+@media (min-width: 768px) {
+  .container-mobile {
+    max-width: 768px;
+  }
+
+  .section-spacing {
+    padding: 48px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,12 +1,33 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+  remotePatterns: [
+  {
+    protocol: "https",
+    hostname: "res.cloudinary.com",
+    pathname: "/**",
+  },
+  {
+    protocol: "https",
+    hostname: "images.unsplash.com",
+    pathname: "/**",
+  },
+  {
+    protocol: "https",
+    hostname: "upload.wikimedia.org",
+    pathname: "/**",
+  },
+],
+  },
+
   experimental: {
     agentFeedback: true,
   },
-  cacheComponents: true,
-  partialPrefetching: true,
+
+  cacheComponents: false,
+  partialPrefetching: false,
+
   turbopack: {
     rules: {
       "*.css": {
