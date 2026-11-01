@@ -33,7 +33,10 @@ model User {
   sermonReviews        SermonReview[]
   savedSermons         SavedSermon[]
   sermonReports        SermonReport[]       @relation("SermonReporter")
+  churchPositionId     String?
+  churchPosition       ChurchPosition?      @relation(fields: [churchPositionId], references: [id], onDelete: SetNull)
 
+  @@index([churchPositionId])
   @@index([role])
   @@index([createdAt])
 }
@@ -245,6 +248,22 @@ model AboutPage {
   updatedById       String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+}
+
+model ChurchPosition {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isExecutive Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@index([isActive])
+  @@index([isExecutive])
 }
 
 enum UserRole {

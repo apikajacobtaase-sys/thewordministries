@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -43,6 +43,13 @@ export default async function AccountPage() {
       role: true,
       isActive: true,
       createdAt: true,
+      churchPosition: {
+        select: {
+          name: true,
+          isExecutive: true,
+          isActive: true,
+        },
+      },
     },
   });
 
@@ -99,6 +106,14 @@ export default async function AccountPage() {
               <p className="mt-1 text-xs font-semibold text-[#1877f2]">
                 {user.role.replaceAll("_", " ")}
               </p>
+
+              {user.churchPosition?.isActive && (
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#e7f3ff] px-3 py-1 text-xs font-bold text-[#1877f2]">
+                  <ShieldCheck size={13} />
+                  {user.churchPosition.name}
+                  {user.churchPosition.isExecutive && "  Executive"}
+                </div>
+              )}
 
               <p className="mt-1 text-[11px] text-[#65676b]">
                 Member since{" "}
@@ -234,4 +249,3 @@ export default async function AccountPage() {
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -128,6 +128,18 @@ export default async function MorePage() {
       description: "Our story, vision, mission and leadership",
       href: "/about",
       icon: Church,
+    },
+    {
+      label: "Church Leadership",
+      description: "Meet our leaders and executive team",
+      href: "/leadership",
+      icon: Users,
+    },
+    {
+      label: "Our Members",
+      description: "Meet our church family",
+      href: "/members",
+      icon: Users,
     },
     {
       label: "Ministry News",

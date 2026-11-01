@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import {
@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Newspaper,
   Plus,
+  ShieldCheck,
   Users,
   Video,
   Bell,
@@ -152,6 +153,20 @@ export default async function AdminDashboardPage() {
 
   const displayName = user.name?.trim() || "Administrator";
 
+  const visibleModules =
+    user.role === UserRole.SUPER_ADMIN
+      ? [
+          ...modules,
+          {
+            title: "Users & Roles",
+            description: "Manage church members, system access and executive appointments.",
+            href: "/admin/users",
+            icon: ShieldCheck,
+            label: "Manage Users & Roles",
+          },
+        ]
+      : modules;
+
   return (
     <main className="min-h-screen bg-[#f0f2f5] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-[1600px]">
@@ -226,7 +241,7 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {modules.map((module) => {
+            {visibleModules.map((module) => {
               const Icon = module.icon;
 
               return (
@@ -289,6 +304,3 @@ export default async function AdminDashboardPage() {
     </main>
   );
 }
-
-
-
