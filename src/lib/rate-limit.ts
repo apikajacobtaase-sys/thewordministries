@@ -1,4 +1,4 @@
- import { createHash } from "node:crypto";
+﻿import { createHash, randomUUID } from "node:crypto";
 import { db } from "@/lib/prisma";
 
 export interface RateLimitResult {
@@ -19,10 +19,8 @@ function hashKey(key: string): string {
 }
 
 /**
- * Applies a fixed-window rate limit using PostgreSQL.
- *
- * The database transaction locks the relevant bucket before updating it,
- * preventing concurrent requests from freely bypassing the request limit.
+ * Applies a fixed-window rate limit using one atomic PostgreSQL UPSERT.
+ * Avoids interactive transactions and protects against concurrent requests.
  */
 export async function checkRateLimit(
   key: string,
@@ -33,77 +31,58 @@ export async function checkRateLimit(
 
   const windowMs = Math.max(1, Math.floor(options.windowMs));
   const limit = Math.max(1, Math.floor(options.limit));
-
   const expiresAt = new Date(now.getTime() + windowMs);
 
-  return db.$transaction(async (tx) => {
-    // Create the bucket if it does not exist. If another request creates it
-    // concurrently, the unique key ensures that only one bucket is retained.
-    await tx.rateLimit.upsert({
-      where: { key: normalizedKey },
-      create: {
-        key: normalizedKey,
-        count: 0,
-        expiresAt,
-      },
-      update: {},
-    });
+  const rows = await db.$queryRaw<
+    { count: number; expiresAt: Date }[]
+  >`
+    INSERT INTO "RateLimit" (
+      "id",
+      "key",
+      "count",
+      "expiresAt",
+      "createdAt",
+      "updatedAt"
+    )
+    VALUES (
+      ${randomUUID()},
+      ${normalizedKey},
+      1,
+      ${expiresAt},
+      ${now},
+      ${now}
+    )
+    ON CONFLICT ("key")
+    DO UPDATE SET
+      "count" = CASE
+        WHEN "RateLimit"."expiresAt" <= ${now} THEN 1
+        WHEN "RateLimit"."count" >= ${limit}
+          THEN "RateLimit"."count"
+        ELSE "RateLimit"."count" + 1
+      END,
+      "expiresAt" = CASE
+        WHEN "RateLimit"."expiresAt" <= ${now}
+          THEN ${expiresAt}
+        ELSE "RateLimit"."expiresAt"
+      END,
+      "updatedAt" = ${now}
+    RETURNING "count", "expiresAt"
+  `;
 
-    // Lock this bucket so concurrent requests cannot all pass the same limit.
-    await tx.$queryRaw`
-      SELECT "id"
-      FROM "RateLimit"
-      WHERE "key" = ${normalizedKey}
-      FOR UPDATE
-    `;
+  const bucket = rows[0];
 
-    const bucket = await tx.rateLimit.findUniqueOrThrow({
-      where: { key: normalizedKey },
-    });
+  if (!bucket) {
+    throw new Error("Rate limit operation returned no result.");
+  }
 
-    // Start a new window when the previous one has expired.
-    if (bucket.expiresAt.getTime() <= now.getTime()) {
-      await tx.rateLimit.update({
-        where: { key: normalizedKey },
-        data: {
-          count: 1,
-          expiresAt,
-        },
-      });
+  const allowed = bucket.count <= limit;
 
-      return {
-        allowed: true,
-        remaining: limit - 1,
-        retryAfterSeconds: Math.ceil(windowMs / 1000),
-      };
-    }
-
-    // Do not count requests that have already exceeded the limit.
-    if (bucket.count >= limit) {
-      return {
-        allowed: false,
-        remaining: 0,
-        retryAfterSeconds: Math.max(
-          1,
-          Math.ceil((bucket.expiresAt.getTime() - now.getTime()) / 1000),
-        ),
-      };
-    }
-
-    const updated = await tx.rateLimit.update({
-      where: { key: normalizedKey },
-      data: {
-        count: { increment: 1 },
-      },
-    });
-
-    return {
-      allowed: true,
-      remaining: Math.max(0, limit - updated.count),
-      retryAfterSeconds: Math.max(
-        1,
-        Math.ceil((bucket.expiresAt.getTime() - now.getTime()) / 1000),
-      ),
-    };
-  });
+  return {
+    allowed,
+    remaining: Math.max(0, limit - bucket.count),
+    retryAfterSeconds: Math.max(
+      1,
+      Math.ceil((bucket.expiresAt.getTime() - now.getTime()) / 1000),
+    ),
+  };
 }

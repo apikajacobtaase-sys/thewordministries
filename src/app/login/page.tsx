@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -85,7 +85,7 @@ function LoginForm() {
     role="status"
     className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
   >
-    Your email has been verified and your account created successfully.
+    Your account has been created successfully.
     You can now sign in.
   </div>
 )}
